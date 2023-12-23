@@ -1,0 +1,7 @@
+{
+  "name": "PeMtris",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
