@@ -1,27 +1,26 @@
-#container {
-  text-align: center;
+#game{
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  #bootle {
+    height: 85vh;
+    width: 320px;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); 
+    grid-template-rows: repeat(20, 1fr); 
+    gap: 1px; /* Espacio entre las celdas */
+    border: 1px solid #ccc; /* Borde del tablero */
+    background-color: #f0f0f0; /* Color de fondo del tablero */    
+    .cell{
+      border: 1px solid #000; /* Borde de cada celda */
+      color: #000;
+    }
+  }
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
-
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
+  .active{
+    border: 1px solid #000; /* Borde de cada celda */
+    background-color: red;
+  }
 }
