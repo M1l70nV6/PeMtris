@@ -3,7 +3,7 @@
   <div id="bootle">
     <div class="cell" *ngFor="let cell of getBoard()
       index as i"
-      [ngClass]="cell === 1 ? 'active' : ''">{{cell}}</div>
+      [ngClass]="cell === 1 ? 'active' : (cell === 2 ? 'sticked' : '')">{{cell}}</div>
   </div>
 </div>
 </ion-content>
