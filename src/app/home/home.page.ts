@@ -1,151 +1,91 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  NgZone,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
-export class HomePage implements OnInit, OnDestroy {
-  private rows: number;
-  private cols: number;
-  private game_grid: number[];
-  private block: number[][];
-
-  private xo: number;
-  private yo: number;
-  private xf: number;
-  private yf: number;
-
-  private fps: number = 60;
-  private interval: number = 0;
-  private lastTime: number = 0;
-
-  constructor(private ngzone: NgZone, private cdr: ChangeDetectorRef) {
-    this.rows = 20;
-    this.cols = 10;
-    this.game_grid = [];
-    this.block = [
-      [1, 1, 1, 1],
-      [1, 1, 0, 0, 1, 1],
-      [1, 1, 1, 1, 0, 0, 0, 0],
-      [0, 1, 0, 1, 1, 1],
-    ];
-    this.xo = 0;
-    this.yo = 0;
-    this.xf = 0;
-    this.yf = 0;
-  }
-
+/* 
+    2.3 Colisión
+    2.4 Rotación
+    2.5 Sticky
+  */
+export class HomePage implements OnInit {
+  private WIDTH_BOARD: number = 10;
+  private HEIGHT_BOARD: number = 20;
+  private SHAPES = [
+    [[1, 1, 1, 1]],
+    [
+      [1, 1],
+      [1, 1],
+    ],
+  ];
+  private board: number[] = [];
+  private tetramino: any;
+  private dx:number=0;
+  private dy:number=0;
+  constructor() {}
   ngOnInit(): void {
-    this.gameinit();
-    this.startGameLoop();
+    this.initBoard();
+    this.generateTetramino();
+    this.drawTetramino(this.dx,this.dy);
   }
 
-  //Iniciar rejilla de juego
-  gameinit(): void {
-    for (let i = 0; i < this.rows * this.cols; i++) {
-      this.game_grid[i] = 0;
+  //1. Tablero
+  initBoard(): void {
+    for (let i = 0; i < this.WIDTH_BOARD * this.HEIGHT_BOARD; i++) {
+      this.board[i] = 0;
     }
   }
-  //Inicia el Game Loop
-  private startGameLoop(): void {
-    this.ngzone.runOutsideAngular(() => {
-      //Iniciar el bucle del juego y correrlo fuera de angular
-      this.gameloop();
-    });
+  getBoard(): number[] {
+    return this.board;
   }
-  //bucle del juego a FPS
-  gameloop(): void {
-    const animate = (time: number) => {
-      if (!this.lastTime) {
-        this.lastTime = time;
-      }
-      let transcurrido = time - this.lastTime;
+  //Tablero
 
-      if (transcurrido > 1000 / this.fps) {
-        this.update();
-        this.lastTime = time - (transcurrido % (1000 / this.fps));
-      }
-      this.interval = requestAnimationFrame(animate);
+  //2. Tetramino
+  //2.1 Forma
+
+  generateTetramino() {
+    const shape = this.SHAPES[Math.floor(Math.random() * this.SHAPES.length)];
+    this.tetramino = {
+      y: 0,
+      x: Math.floor(this.WIDTH_BOARD / 2 - shape.length / 2),
+      shape: shape,
     };
-    animate(0);
   }
-
-  //lienzo de accion
-  update(): void {
-    this.draw();
-  }
-  draw(): void {
-    const blockaleatorio = Math.floor(Math.random() * 4);
-    this.dropBlock(100);
-    this.eraseBlock(0);
-    this.drawBlock(0);
-    this.cdr.detectChanges();
-  }
-
-  dropBlock(ms:number){
-    if (this.interval % ms === 0) {
-      this.yo = this.yf;
-      this.xo = this.xf;
-      if(this.yf<this.rows-2){
-        this.yf++;
-      }else{
-        this.yf=this.yo;
+  drawTetramino(dx:number,dy:number){
+    for (let y = 0; y < this.tetramino.shape.length; y++) {
+      for (let x = 0; x < this.tetramino.shape[y].length; x++) {
+        const newX= this.tetramino.x + x +dx; 
+        const newY= this.tetramino.y + y +dy;
+        this.board[newY*this.WIDTH_BOARD+newX] = this.tetramino.shape[y][x]; 
       }
     }
   }
-  eraseBlock(b: number) {
-    let size = this.block[b].length / 2;
-    for (let i = 0; i < 2; i++) {
-      for (let j = 0; j < size; j++) {
-        console.log(this.game_grid[(i + this.yo) * this.cols + (j + this.xo)]);
-        this.game_grid[(i + this.yo) * this.cols + (j + this.xo)] = 0;
+  eraseTetramino(dx:number,dy:number){
+    for (let y = 0; y < this.tetramino.shape.length; y++) {
+      for (let x = 0; x < this.tetramino.shape[y].length; x++) {
+        const newX= this.tetramino.x + x + dx; 
+        const newY= this.tetramino.y + y +dy;
+        this.board[newY*this.WIDTH_BOARD+newX] = 0; 
       }
     }
   }
-  drawBlock(b: number) {
-    let size = this.block[b].length / 2;
-    for (let i = 0; i < 2; i++) {
-      for (let j = 0; j < size; j++) {
-        this.game_grid[(i + this.yf) * this.cols + (j + this.xf)] =
-          this.block[b][i * size + j];
-      }
-    }
-  }
+  //2.2 Movimiento
+  onKeyDown(e:KeyboardEvent):void{
+    this.eraseTetramino(this.dx,this.dy);//borrar la antigua figura
 
-  onKeyDown(event: KeyboardEvent): void {
-    this.yo = this.yf;
-    this.xo = this.xf;
-
-    switch (event.key) {
+    switch(e.key){
       case 'ArrowDown':
-      if(this.yf<this.rows-2){
-        this.yf++;
-      }else{
-        this.yf=this.yo;
-      }
-
+        this.dy++;
+      break;
+      case 'ArrowLeft':
+        this.dx--;
       break;
       case 'ArrowRight':
-        this.xf++;
-        break;
-      case 'ArrowLeft':
-        this.xf--;
-        break;
+        this.dx++;
+      break;
     }
-  }
-  //regresa el vector rejilla del juego
-  getGameGrid() {
-    return this.game_grid;
-  }
-  //cierre del app
-  ngOnDestroy(): void {
-    cancelAnimationFrame(this.interval);
+    this.drawTetramino(this.dx,this.dy);//dibujar la nueva figura
   }
 }

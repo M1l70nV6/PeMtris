@@ -16,11 +16,16 @@
     .cell{
       border: 1px solid #000; /* Borde de cada celda */
       color: #000;
+      font-size: 8px;
     }
   }
 
   .active{
     border: 1px solid #000; /* Borde de cada celda */
+    background-color: green;
+  }
+  .sticked{
+    border: none;
     background-color: red;
   }
 }

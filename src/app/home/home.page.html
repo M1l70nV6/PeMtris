@@ -1,10 +1,9 @@
-<ion-content tabindex="0" (keydown)="onKeyDown($event)">
-  <div id="game">
-    <div id="bootle">
-      <div class="cell" *ngFor="let celda of getGameGrid()" [ngClass]="{'active': celda === 1}">
-
-      </div>
-    </div>
+<ion-content (keydown)="onKeyDown($event)" tabindex="0">
+<div id="game">
+  <div id="bootle">
+    <div class="cell" *ngFor="let cell of getBoard()
+      index as i"
+      [ngClass]="cell === 1 ? 'active' : ''">{{cell}}</div>
   </div>
-
+</div>
 </ion-content>
