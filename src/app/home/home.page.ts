@@ -6,7 +6,6 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['home.page.scss'],
 })
 /* 
-    2.3 Colisión
     2.4 Rotación
     2.5 Sticky
   */
@@ -51,16 +50,9 @@ export class HomePage implements OnInit {
       y: 0,
       x: Math.floor(this.WIDTH_BOARD / 2 - shape.length / 2),
       shape: shape,
+      newX:0,//2.3 Colisión
+      newY:0//2.3 Colisión
     };
-  }
-  drawTetramino(dx:number,dy:number){
-    for (let y = 0; y < this.tetramino.shape.length; y++) {
-      for (let x = 0; x < this.tetramino.shape[y].length; x++) {
-        const newX= this.tetramino.x + x +dx; 
-        const newY= this.tetramino.y + y +dy;
-        this.board[newY*this.WIDTH_BOARD+newX] = this.tetramino.shape[y][x]; 
-      }
-    }
   }
   eraseTetramino(dx:number,dy:number){
     for (let y = 0; y < this.tetramino.shape.length; y++) {
@@ -71,19 +63,38 @@ export class HomePage implements OnInit {
       }
     }
   }
+  drawTetramino(dx:number,dy:number){
+    for (let y = 0; y < this.tetramino.shape.length; y++) {
+      for (let x = 0; x < this.tetramino.shape[y].length; x++) {
+        const newX= this.tetramino.x + x +dx; 
+        const newY= this.tetramino.y + y +dy;
+        this.board[newY*this.WIDTH_BOARD+newX] = this.tetramino.shape[y][x]; 
+        this.tetramino.newX=newX;//2.3 Colisión
+        this.tetramino.newY=newY;//2.3 Colisión
+      }
+    }
+  }
+
+
   //2.2 Movimiento
   onKeyDown(e:KeyboardEvent):void{
-    this.eraseTetramino(this.dx,this.dy);//borrar la antigua figura
 
+    this.eraseTetramino(this.dx,this.dy);//borrar la antigua figura
     switch(e.key){
       case 'ArrowDown':
-        this.dy++;
+        if(this.tetramino.newY < this.HEIGHT_BOARD-1){//2.3 Colisión
+          this.dy++;
+        }
       break;
       case 'ArrowLeft':
-        this.dx--;
+        if(this.tetramino.newX >= this.tetramino.shape[0].length){//2.3 Colisión
+          this.dx--;
+        }
       break;
       case 'ArrowRight':
-        this.dx++;
+        if(this.tetramino.newX <= this.WIDTH_BOARD-2){//2.3 Colisión
+          this.dx++;
+        }
       break;
     }
     this.drawTetramino(this.dx,this.dy);//dibujar la nueva figura
